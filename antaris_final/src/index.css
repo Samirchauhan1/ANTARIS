@@ -533,3 +533,114 @@ html[data-theme="light"] .appearance-dot.light{background:#edf5f8;border:1px sol
 .connection-key{font:9px 'JetBrains Mono';letter-spacing:.04em;color:var(--muted)}
 html[data-theme="light"] .connection-row{background:#f6fbfc;color:var(--text)}
 html[data-theme="light"] .connection-row:hover{background:#edf7f9}
+
+
+/* --------------------------------------------------------------------------
+   FINAL LIGHT MODE POLISH
+   Shared typography + contrast normalization for every mission screen.
+   -------------------------------------------------------------------------- */
+html[data-theme="light"] body,
+html[data-theme="light"] .app-shell,
+html[data-theme="light"] .main-shell,
+html[data-theme="light"] .content-area {
+  color: var(--text);
+  background: var(--bg);
+}
+
+html[data-theme="light"] .page-shell {
+  font-family: "Inter", sans-serif;
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4,
+html[data-theme="light"] h5,
+html[data-theme="light"] h6,
+html[data-theme="light"] .font-display,
+html[data-theme="light"] .section-title,
+html[data-theme="light"] .inspector-name {
+  font-family: "Rajdhani", sans-serif;
+  color: var(--text);
+}
+
+html[data-theme="light"] p,
+html[data-theme="light"] li,
+html[data-theme="light"] label,
+html[data-theme="light"] .page-subtitle {
+  color: var(--muted);
+}
+
+/* Legacy inline dark colors from the earlier dashboard screens. */
+html[data-theme="light"] [style*="#e2e8f0"],
+html[data-theme="light"] [style*="#e7eef7"] { color: var(--text) !important; }
+html[data-theme="light"] [style*="#94a3b8"],
+html[data-theme="light"] [style*="#64748b"] { color: var(--muted) !important; }
+html[data-theme="light"] [style*="#475569"],
+html[data-theme="light"] [style*="#52647a"] { color: var(--dim) !important; }
+
+html[data-theme="light"] [style*="rgba(7,13,26"],
+html[data-theme="light"] [style*="rgba(3,10,19"],
+html[data-theme="light"] [style*="rgba(4,14,24"] {
+  background: #f4f9fb !important;
+  color: var(--text) !important;
+  border-color: var(--border-soft) !important;
+}
+
+html[data-theme="light"] [style*="rgba(255,255,255,0.02)"],
+html[data-theme="light"] [style*="rgba(255,255,255,0.025)"],
+html[data-theme="light"] [style*="rgba(255,255,255,0.035)"] {
+  background: #f8fbfc !important;
+  border-color: var(--border-soft) !important;
+}
+
+html[data-theme="light"] .chart-container svg text {
+  fill: var(--dim);
+}
+
+html[data-theme="light"] .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #ffffff !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme="light"] .viewport-legend {
+  background: rgba(255,255,255,.92);
+  color: var(--dim);
+  border-color: var(--border);
+}
+
+html[data-theme="light"] .viewport-help {
+  color: var(--dim);
+}
+
+html[data-theme="light"] .twin-viewport {
+  background: #e8f3f6;
+  border-color: var(--border);
+}
+
+html[data-theme="light"] .connection-row {
+  box-shadow: 0 2px 8px rgba(16,42,60,.05);
+}
+
+html[data-theme="light"] .layer-btn.active {
+  background: rgba(5,119,147,.09);
+}
+
+html[data-theme="light"] .twin-inspector {
+  background: rgba(255,255,255,.94);
+}
+
+html[data-theme="light"] .status-pill {
+  background: rgba(5,119,147,.05);
+}
+
+/* Make form controls consistent and readable in both modes. */
+select, input, textarea, button {
+  font-family: "Inter", sans-serif;
+}
+.section-label,
+.eyebrow,
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
