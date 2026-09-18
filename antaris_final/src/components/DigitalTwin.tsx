@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import ThreeDStationCanvas, { StationModelItem, StationConnection } from "./ThreeDStationCanvas";
+import ThreeDStationCanvas, { type StationModelItem, type StationConnection } from "./ThreeDStationCanvas";
 
 type S = "normal" | "warning" | "critical" | "offline" | "monitoring";
 interface Item extends StationModelItem { temperature:string; power:string; alert:string; lastUpdate:string }
