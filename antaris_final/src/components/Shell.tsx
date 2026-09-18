@@ -31,7 +31,7 @@ const nav: { id: Screen; label: string; icon: React.ReactNode; badge?: number }[
   ['settings', 'Settings', Icons.settings]
 ].map(x => ({ id: x[0] as Screen, label: x[1] as string, icon: x[2], badge: x[3] as number | undefined }));
 
-const themes = ['Polar Dark', 'Arctic Light', 'Midnight Blue', 'Scientific', 'High Contrast'];
+const themes = ['Dark', 'Light'];
 const stations = ['MAITRI', 'BHARATI'] as const;
 
 function time(station: 'MAITRI' | 'BHARATI') {
@@ -118,7 +118,7 @@ export default function Shell(p: Props) {
             <span>›</span>
           </button>
           <div className="footer-actions">
-            <select value={p.theme} onChange={e => p.onTheme(e.target.value)} title="Change Theme" aria-label="Change Theme">
+            <select className="appearance-select" value={p.theme} onChange={e => p.onTheme(e.target.value)} title="Change appearance" aria-label="Change appearance">
               {themes.map(x => <option key={x}>{x}</option>)}
             </select>
             <button onClick={p.onLogout} title="Log Out" aria-label="Log Out">↪</button>
