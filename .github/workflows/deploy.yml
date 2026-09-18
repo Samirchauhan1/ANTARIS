@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,16 +37,42 @@ jobs:
           cache: npm
           cache-dependency-path: antaris_final/package-lock.json
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build ANTARIS
         run: npm run build
 
+      - name: Prepare Pages artifact
+        working-directory: .
+        run: |
+          rm -rf _site
+          mkdir -p _site/antaris_final
+          cp -R antaris_final/dist/. _site/antaris_final/
+          cat > _site/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=./antaris_final/">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>ANTARIS</title>
+          </head>
+          <body>
+            <p>Opening ANTARIS…</p>
+            <script>window.location.replace('./antaris_final/');</script>
+          </body>
+          </html>
+          EOF
+          touch _site/.nojekyll
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: antaris_final/dist
+          path: _site
 
   deploy:
     environment:
