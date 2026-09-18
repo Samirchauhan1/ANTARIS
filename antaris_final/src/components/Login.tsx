@@ -206,7 +206,7 @@ export default function Login({ onLogin }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#4dd8e0' }}>
           <AntarisLogo size={26} />
           <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 13, letterSpacing: '0.22em', color: '#d8eef5', fontWeight: 700 }}>ANTARIS</span>
-          <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 9, color: '#2a6070', letterSpacing: '0.1em', marginLeft: 4 }}>POLAR-OS v1.0</span>
+          <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 9, color: '#2a6070', letterSpacing: '0.1em', marginLeft: 4 }}>ANTARIS · REMOTE STATION INTELLIGENCE</span>
         </div>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           <div style={{ fontFamily: "'JetBrains Mono'", fontSize: 9, color: '#2a5060', letterSpacing: '0.1em' }}>
