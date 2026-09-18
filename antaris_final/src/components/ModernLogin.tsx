@@ -47,13 +47,13 @@ export default function ModernLogin({ onLogin }: Props) {
   return (
     <main className="login-page">
       <header className="login-header">
-        <div className="login-brand"><AntarisLogo size={30} /><span>ANTARIS</span><small>POLAR-OS / SECURE ACCESS</small></div>
+        <div className="login-brand"><AntarisLogo size={30} /><span>ANTARIS</span><small>SECURE ACCESS</small></div>
         <div className="login-header-meta"><span>MINISTRY OF EARTH SCIENCES</span><span className="status-mark"><i /> PLATFORM READY</span></div>
       </header>
 
       <div className="login-layout">
         <section className="access-panel">
-          <div className="access-heading"><div><span className="panel-kicker">AUTHORIZED PERSONNEL</span><h2>Access POLAR-OS</h2></div><div className="access-lock">SECURE<br />MFA</div></div>
+          <div className="access-heading"><div><span className="panel-kicker">AUTHORIZED PERSONNEL</span><h2>Access ANTARIS</h2></div><div className="access-lock">SECURE<br />MFA</div></div>
           {step === 'login' ? <>
             <form onSubmit={event => { event.preventDefault(); auth('password'); }} className="access-form">
               <label>OFFICIAL EMAIL<input type="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="operator@ncpor.res.in" /></label>
@@ -65,7 +65,7 @@ export default function ModernLogin({ onLogin }: Props) {
             <div className="access-note"><b>ACCESS CONTROLLED ENVIRONMENT</b><span>Authentication is handled through the authorized backend. All operator actions are audit logged.</span></div>
           </> : <div className="otp-panel"><span className="panel-kicker">SECOND FACTOR REQUIRED</span><h2>Verify mission access</h2><p>Enter the six-digit code sent to <b>{email || 'your identity provider'}</b>.</p><div className="otp-inputs" onPaste={handleOtpPaste}>{[0, 1, 2, 3, 4, 5].map(index => <input key={index} ref={element => { inputRefs.current[index] = element; }} maxLength={1} inputMode="numeric" value={otp[index] || ''} onChange={event => handleOtpChange(index, event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && otp.length === 6) submit(); if (event.key === 'Backspace' && !otp[index] && index > 0) inputRefs.current[index - 1]?.focus(); }} />)}</div><button className="access-submit" onClick={submit} disabled={loading}>{loading ? 'VERIFYING...' : 'VERIFY ACCESS'}<span>↗</span></button><button className="back-link" onClick={() => setStep('login')}>← Return to sign in</button><small>Demo verification: 123456</small></div>}
           {error && <div className="login-error">{error}</div>}
-          <footer className="access-footer">POLAR-OS v1.0 <span>•</span> SIH26060 <span>•</span> NCPOR DEMONSTRATION INSTANCE</footer>
+          <footer className="access-footer">ANTARIS v1.0 <span>•</span> SIH26060 <span>•</span> NCPOR DEMONSTRATION INSTANCE</footer>
         </section>
       </div>
 
@@ -80,6 +80,119 @@ export default function ModernLogin({ onLogin }: Props) {
         .station-stage{height:320px;max-width:none;margin-top:23px;border:1px solid rgba(0,200,232,.18);background:linear-gradient(180deg,rgba(10,30,48,.74),rgba(7,13,26,.88) 72%),repeating-linear-gradient(90deg,rgba(0,200,232,.05) 0 1px,transparent 1px 44px);box-shadow:inset 0 0 70px rgba(0,0,0,.25)}.stage-grid{border-top-color:rgba(0,200,232,.35);background:repeating-linear-gradient(90deg,rgba(0,200,232,.14) 0 1px,transparent 1px 48px),repeating-linear-gradient(0deg,rgba(0,200,232,.12) 0 1px,transparent 1px 34px)}.stage-label,.stage-readout{color:#64748b}.stage-readout b{color:#e2e8f0}.station-3d{filter:drop-shadow(0 20px 12px rgba(0,0,0,.7))}.station-module{background:linear-gradient(135deg,#183449,#0d1b2e);border-color:#287c92;box-shadow:inset 0 0 18px rgba(0,200,232,.14)}.station-module span{color:#00c8e8}.station-module i{background:#00c8e8;box-shadow:0 0 8px rgba(0,200,232,.55)}.station-dome{border-color:#5b9eb1;background:linear-gradient(90deg,#183f52,#0d1b2e)}.station-antenna{border-color:#00c8e8}.station-antenna i{border-color:#00c8e8}.station-leg{background:#557b8d}.stage-callout{color:#64748b;border-color:#00c8e8}.stage-callout b{color:#94a3b8}.login-disclaimer{color:#475569}
         .access-panel{background:rgba(13,27,46,.94);color:#e2e8f0;padding:28px 30px 22px;max-width:460px;border:1px solid rgba(0,200,232,.18);border-radius:8px;box-shadow:0 22px 55px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.035);backdrop-filter:blur(18px)}.access-heading{border-bottom-color:rgba(0,200,232,.14);padding-bottom:19px}.access-heading h2,.otp-panel h2{font:600 28px Rajdhani;color:#e2e8f0}.access-lock{color:#00c8e8;border-color:rgba(0,200,232,.25);background:rgba(0,200,232,.04)}.access-form{margin-top:22px;gap:15px}.access-form label{color:#64748b}.access-form input{margin-top:7px;padding:12px;background:#070d1a;color:#e2e8f0;border-color:rgba(148,163,184,.2);border-radius:4px;font:13px Inter}.access-form input::placeholder{color:#475569}.access-form input:focus,.otp-inputs input:focus{border-color:#00c8e8;box-shadow:0 0 0 2px rgba(0,200,232,.1)}.access-submit{background:linear-gradient(135deg,#00a8c2,#0ea5e9);color:#06111b;border-radius:4px;font:700 10px 'JetBrains Mono';box-shadow:0 0 20px rgba(0,200,232,.14)}.access-submit:hover{background:#00c8e8}.access-divider{color:#475569}.access-divider:before,.access-divider:after{background:rgba(0,200,232,.14)}.provider-grid button{padding:10px 12px;border-color:rgba(148,163,184,.16);background:rgba(7,13,26,.5);color:#94a3b8;border-radius:4px}.provider-grid button:hover{border-color:rgba(0,200,232,.35);background:rgba(0,200,232,.06)}.access-note{margin-top:18px;padding:11px;background:rgba(16,185,129,.05);border-color:#10b981}.access-note b{color:#10b981}.access-note span{color:#64748b}.access-footer{border-color:rgba(0,200,232,.12);color:#475569}.login-error{background:rgba(239,68,68,.08);color:#ff8d8d;border-color:#ef4444}.otp-inputs input{background:#070d1a;color:#e2e8f0;border-color:rgba(148,163,184,.2);border-radius:4px}.back-link{color:#00c8e8}.otp-panel p{color:#94a3b8}.otp-panel p b{color:#cbd5e1}.otp-panel small{color:#475569}
         @media(max-width:900px){.login-layout{grid-template-columns:1fr;gap:28px}.access-panel{max-width:none}.login-briefing h1{font-size:54px}}@media(max-width:560px){.login-header{padding:0 18px}.login-brand small{display:none}.login-header-meta{font-size:8px}.login-layout{width:calc(100% - 36px);padding:28px 0}.login-briefing h1{font-size:45px}.login-pipeline{display:grid;grid-template-columns:1fr 1fr;gap:7px}.pipeline-step{min-width:0}.pipeline-step i{display:none}.station-stage{height:255px}.station-3d{left:27%;top:92px}.access-panel{padding:24px 20px 18px}.provider-grid{grid-template-columns:1fr}.provider-grid .provider-full{grid-column:auto}}
+        /* Final ANTARIS login contrast pass: clear hierarchy, no faded verification copy. */
+        .login-page{
+          background:#07131f;
+          color:#eaf4f6;
+          background-image:
+            radial-gradient(circle at 18% 18%,rgba(0,200,232,.11),transparent 30%),
+            radial-gradient(circle at 84% 12%,rgba(16,185,129,.07),transparent 25%),
+            linear-gradient(135deg,#07131f 0%,#0a1b2a 55%,#08151f 100%);
+        }
+        .login-page:before{
+          background-image:
+            linear-gradient(rgba(54,183,205,.055) 1px,transparent 1px),
+            linear-gradient(90deg,rgba(54,183,205,.055) 1px,transparent 1px);
+        }
+        .login-header{
+          background:rgba(7,19,31,.96);
+          border-bottom:1px solid rgba(96,198,216,.22);
+        }
+        .login-brand>span{color:#f1f7f8}
+        .login-brand small{color:#7fa0aa;border-color:rgba(96,198,216,.28)}
+        .login-header-meta{color:#91a7ae}
+        .login-kicker,.panel-kicker{color:#20c7df;font-weight:700}
+        .access-panel{
+          background:#f8fbfc;
+          color:#102a35;
+          border:1px solid #b9d4da;
+          box-shadow:0 24px 65px rgba(0,0,0,.38),0 0 0 1px rgba(0,200,232,.06);
+          backdrop-filter:none;
+        }
+        .access-heading{border-bottom-color:#c7dadd}
+        .access-heading h2,.otp-panel h2{
+          color:#102a35 !important;
+          font-family:Rajdhani,sans-serif;
+          font-weight:700;
+          letter-spacing:.015em;
+          text-shadow:none;
+        }
+        .access-heading h2{font-size:30px}
+        .otp-panel h2{font-size:30px}
+        .access-lock{
+          color:#087f94;
+          border-color:#a7cdd4;
+          background:#eef8fa;
+          font-weight:700;
+        }
+        .access-form label{
+          color:#46636c;
+          font-weight:700;
+        }
+        .access-form input{
+          background:#ffffff;
+          color:#102a35;
+          border-color:#b7ccd1;
+        }
+        .access-form input::placeholder{color:#78919a}
+        .access-submit{
+          background:linear-gradient(135deg,#078da5,#0b9ec0);
+          color:#ffffff;
+          border:1px solid #087d91;
+          box-shadow:0 7px 18px rgba(7,141,165,.2);
+        }
+        .access-submit:hover{background:#087f94}
+        .access-divider{color:#668089}
+        .access-divider:before,.access-divider:after{background:#cadadd}
+        .provider-grid button{
+          background:#ffffff;
+          color:#294d58;
+          border-color:#c2d4d8;
+        }
+        .provider-grid button:hover{
+          background:#eef8fa;
+          color:#0b6578;
+          border-color:#55aebb;
+        }
+        .access-note{
+          background:#edf8f4;
+          border-left-color:#10a47b;
+        }
+        .access-note b{color:#08775f}
+        .access-note span{color:#526f76}
+        .access-footer{
+          color:#718890;
+          border-color:#d0dfe2;
+        }
+        .login-error{
+          background:#fff0ee;
+          color:#a23d35;
+          border-color:#d85a50;
+        }
+        .otp-panel{margin-top:26px}
+        .otp-panel .panel-kicker{
+          display:block;
+          margin-bottom:4px;
+          color:#078da5;
+        }
+        .otp-panel p{
+          color:#506c75 !important;
+          font-size:12px;
+        }
+        .otp-panel p b{color:#173f49 !important}
+        .otp-inputs input{
+          background:#ffffff;
+          color:#102a35 !important;
+          border-color:#a9c8cf;
+          box-shadow:0 2px 6px rgba(16,42,53,.04);
+        }
+        .otp-inputs input:focus{
+          border-color:#078da5;
+          box-shadow:0 0 0 3px rgba(7,141,165,.12);
+        }
+        .back-link{color:#087f94;font-weight:600}
+        .otp-panel small{color:#70888f}
+
         /* Viewport-fit command screen and a deeper station silhouette. */
         @media(min-width:901px){.login-page{height:100vh;overflow:hidden}.login-layout{height:calc(100vh - 64px);min-height:0;align-items:start;padding:20px 0 18px}.login-briefing h1{margin-top:14px;margin-bottom:14px}.login-lead{line-height:1.55}.login-pipeline{margin-top:18px}.station-stage{height:300px;margin-top:18px}.access-panel{margin-top:0}}
         .station-3d{width:300px;height:170px;left:36%;top:82px;transform:perspective(720px) rotateX(58deg) rotateZ(-9deg) scale(1.08);transform-style:preserve-3d}
