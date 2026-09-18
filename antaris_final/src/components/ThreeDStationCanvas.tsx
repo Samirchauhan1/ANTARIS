@@ -52,6 +52,57 @@ const STATUS: Record<string, string> = {
   offline: "#73869a",
 };
 
+function canvasPalette() {
+  const light = typeof document !== "undefined" && document.documentElement.dataset.theme === "light";
+  return light ? {
+    light,
+    groundTop: "#d9e9ee",
+    groundMid: "#e9f3f6",
+    groundBottom: "#f7fbfc",
+    grid: "rgba(5,119,147,.16)",
+    ridge: "rgba(79,130,145,.28)",
+    buildingA: "#d9e8ed",
+    buildingB: "#c8dce3",
+    buildingC: "#bed3db",
+    buildingD: "#d0e2e7",
+    roof: "#b8d4dc",
+    selectedA: "#bdeaf1",
+    selectedB: "#a8dce6",
+    labelBg: "rgba(255,255,255,.94)",
+    labelText: "#163047",
+    statusText: "#35566b",
+    tower: "#587784",
+    equipment: "#d7e8ed",
+    shadow: "rgba(31,61,76,.16)",
+    connectionBg: "rgba(255,255,255,.94)",
+    connectionText: "#23445a",
+    ambient: "rgba(5,119,147,.07)",
+  } : {
+    light,
+    groundTop: "#102b3b",
+    groundMid: "#0b2030",
+    groundBottom: "#071520",
+    grid: "#2c8da4",
+    ridge: "#b8dfe8",
+    buildingA: "#123444",
+    buildingB: "#0d2939",
+    buildingC: "#0b2838",
+    buildingD: "#102f3e",
+    roof: "#234e5d",
+    selectedA: "#164b5b",
+    selectedB: "#0e3949",
+    labelBg: "rgba(5,17,28,.9)",
+    labelText: "#d9f4f8",
+    statusText: "#d9f4f8",
+    tower: "#8faab4",
+    equipment: "#173b4b",
+    shadow: "#000",
+    connectionBg: "rgba(5,17,28,.92)",
+    connectionText: "#d9f4f8",
+    ambient: "rgba(34,218,190,.14)",
+  };
+}
+
 function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)); }
 function mix(a: number, b: number, t: number) { return a + (b - a) * t; }
 
@@ -120,8 +171,9 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
     };
 
     const drawSnow = (w: number, h: number) => {
+      const theme = canvasPalette();
       const g = ctx.createLinearGradient(0, h * .45, 0, h);
-      g.addColorStop(0, "#102b3b"); g.addColorStop(.5, "#0b2030"); g.addColorStop(1, "#071520");
+      g.addColorStop(0, theme.groundTop); g.addColorStop(.5, theme.groundMid); g.addColorStop(1, theme.groundBottom);
       ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 
       const center = project({ x: 0, y: -0.05, z: 0 });
@@ -131,10 +183,10 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
       const edgeD = project({ x: -15, y: -0.05, z: 15 });
       quad([edgeA, edgeB, edgeC, edgeD], "rgba(183,224,233,.035)");
 
-      ctx.save(); ctx.globalAlpha = .18; ctx.lineWidth = 1;
+      ctx.save(); ctx.globalAlpha = theme.light ? .28 : .18; ctx.lineWidth = 1;
       for (let i = -14; i <= 14; i += 2) {
         const a = project({ x: i, y: 0, z: -14 }); const b = project({ x: i, y: 0, z: 14 });
-        ctx.strokeStyle = "#2c8da4"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.strokeStyle = theme.grid; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
       for (let i = -14; i <= 14; i += 2) {
         const a = project({ x: -14, y: 0, z: i }); const b = project({ x: 14, y: 0, z: i });
@@ -143,11 +195,11 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
       ctx.restore();
 
       // Subtle snow ridges / wind lines.
-      ctx.save(); ctx.globalAlpha = .12;
+      ctx.save(); ctx.globalAlpha = theme.light ? .38 : .12;
       for (let i = 0; i < 18; i++) {
         const z = -12 + i * 1.5;
         const a = project({ x: -14, y: .02, z }); const b = project({ x: 14, y: .02, z: z + .4 });
-        ctx.strokeStyle = "#b8dfe8"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        ctx.strokeStyle = theme.ridge; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
       ctx.restore();
       void center;
@@ -162,31 +214,32 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
       const t = [p(x0,y1,z0),p(x1,y1,z0),p(x1,y1,z1),p(x0,y1,z1)];
       const c = STATUS[item.status];
       const selected = selectedRef.current === item.id;
+      const theme = canvasPalette();
       // Shadow.
-      ctx.save(); ctx.globalAlpha = .25; ctx.filter = "blur(7px)";
-      quad(b.map(q => ({...q, x: q.x + 3, y: q.y + 6})), "#000"); ctx.restore();
+      ctx.save(); ctx.globalAlpha = theme.light ? .16 : .25; ctx.filter = "blur(7px)";
+      quad(b.map(q => ({...q, x: q.x + 3, y: q.y + 6})), theme.shadow); ctx.restore();
 
       // Side faces, deliberately separate to create actual perspective depth.
-      quad([b[0], b[1], t[1], t[0]], selected ? "#164b5b" : "#123444", c, selected ? 1.6 : .8);
-      quad([b[1], b[2], t[2], t[1]], selected ? "#0e3949" : "#0d2939", c, .8);
-      quad([b[2], b[3], t[3], t[2]], "#0b2838", c, .6);
-      quad([b[3], b[0], t[0], t[3]], "#102f3e", c, .6);
-      quad(t, selected ? "#1a5262" : "#163e4d", c, selected ? 1.6 : .9);
+      quad([b[0], b[1], t[1], t[0]], selected ? theme.selectedA : theme.buildingA, c, selected ? 1.8 : .9);
+      quad([b[1], b[2], t[2], t[1]], selected ? theme.selectedB : theme.buildingB, c, .9);
+      quad([b[2], b[3], t[3], t[2]], theme.buildingC, c, .7);
+      quad([b[3], b[0], t[0], t[3]], theme.buildingD, c, .7);
+      quad(t, selected ? theme.selectedA : theme.roof, c, selected ? 1.8 : 1);
 
       // Roof equipment.
       if (item.id === "main" || item.id === "lab" || item.id === "living") {
         const roofH = .45;
         const rt = [p(x0+.35,y1,z0+.35),p(x1-.35,y1,z0+.35),p(x1-.35,y1+roofH,z1-.35),p(x0+.35,y1+roofH,z1-.35)];
-        quad(rt, "#234e5d", "rgba(180,230,238,.35)", .5);
+        quad(rt, theme.roof, theme.light ? "rgba(43,103,121,.35)" : "rgba(180,230,238,.35)", .6);
         // roof vents
         for (let i=0;i<3;i++) {
           const cx = mix(x0+.8,x1-1.0,i/2); const v0=p(cx,y1+roofH+.03,z0+.75); const v1=p(cx+.35,y1+roofH+.03,z0+1.05);
-          ctx.strokeStyle="rgba(154,218,229,.5)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(v0.x,v0.y);ctx.lineTo(v1.x,v1.y);ctx.stroke();
+          ctx.strokeStyle=theme.light ? "rgba(43,103,121,.55)" : "rgba(154,218,229,.5)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(v0.x,v0.y);ctx.lineTo(v1.x,v1.y);ctx.stroke();
         }
       }
       if (item.id === "power") {
         const chimney = project({x:item.x+.65,y:item.h+1.7,z:item.z});
-        ctx.strokeStyle="#6f8790";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(project({x:item.x+.65,y:item.h,z:item.z}).x,project({x:item.x+.65,y:item.h,z:item.z}).y);ctx.lineTo(chimney.x,chimney.y);ctx.stroke();
+        ctx.strokeStyle=theme.tower;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(project({x:item.x+.65,y:item.h,z:item.z}).x,project({x:item.x+.65,y:item.h,z:item.z}).y);ctx.lineTo(chimney.x,chimney.y);ctx.stroke();
         ctx.fillStyle="#f5b942";ctx.beginPath();ctx.arc(chimney.x,chimney.y,2.2,0,Math.PI*2);ctx.fill();
       }
       if (item.id === "comm") {
@@ -198,7 +251,7 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
         ];
         const top=project({x:item.x,y:baseY+towerH,z:item.z});
         ctx.save();
-        ctx.strokeStyle="#8faab4";ctx.lineWidth=1.7;
+        ctx.strokeStyle=theme.tower;ctx.lineWidth=1.8;
         for(const leg of corners){ctx.beginPath();ctx.moveTo(leg.x,leg.y);ctx.lineTo(top.x,top.y);ctx.stroke();}
         for(let i=1;i<=5;i++){
           const t=i/6;
@@ -221,32 +274,42 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
       if (item.id === "fuel") {
         for (let i=0;i<2;i++) {
           const cx=item.x-0.75+i*1.5; const base=project({x:cx,y:0,z:item.z}); const top=project({x:cx,y:item.h+.65,z:item.z});
-          ctx.fillStyle="#193d4a";ctx.strokeStyle="#f5b942";ctx.lineWidth=.8;ctx.beginPath();ctx.ellipse(base.x,base.y,11,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(base.x-11,base.y);ctx.lineTo(top.x-11,top.y);ctx.lineTo(top.x+11,top.y);ctx.lineTo(base.x+11,base.y);ctx.stroke();
+          ctx.fillStyle=theme.light ? "#e2eef1" : "#193d4a";ctx.strokeStyle="#f5b942";ctx.lineWidth=.8;ctx.beginPath();ctx.ellipse(base.x,base.y,11,5,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(base.x-11,base.y);ctx.lineTo(top.x-11,top.y);ctx.lineTo(top.x+11,top.y);ctx.lineTo(base.x+11,base.y);ctx.stroke();
         }
       }
       if (item.id === "equip") {
         const base=project({x:item.x,y:item.h,z:item.z}); const panel=project({x:item.x,y:item.h+1.2,z:item.z+.25});
         ctx.strokeStyle="#16c7e8";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.lineTo(panel.x,panel.y);ctx.stroke();
-        ctx.fillStyle="#173b4b";ctx.strokeStyle="#5ec8dc";ctx.beginPath();ctx.rect(panel.x-16,panel.y-8,32,16);ctx.fill();ctx.stroke();
+        ctx.fillStyle=theme.equipment;ctx.strokeStyle=theme.light ? "#2b91a6" : "#5ec8dc";ctx.beginPath();ctx.rect(panel.x-16,panel.y-8,32,16);ctx.fill();ctx.stroke();
       }
 
       // Windows / operational lights.
       for (let i=0;i<Math.max(2,Math.floor(item.w/1.7));i++) {
         const wx=mix(x0+.7,x1-.7,(i+1)/(Math.max(2,Math.floor(item.w/1.7))+1));
         const q=project({x:wx,y:item.h*.45,z:z0-.015});
-        ctx.fillStyle=selected?"rgba(79,223,244,.9)":"rgba(74,164,184,.5)";ctx.fillRect(q.x-2,q.y-1.4,4,2.8);
+        ctx.fillStyle=selected?"rgba(79,223,244,.9)":(theme.light ? "rgba(33,119,139,.48)" : "rgba(74,164,184,.5)");ctx.fillRect(q.x-2,q.y-1.4,4,2.8);
       }
 
       // Label plate projected above building.
       const lp=project({x:item.x,y:item.h+1.15,z:item.z});
       ctx.font="600 10px Rajdhani, sans-serif"; ctx.textAlign="center";
       const textW=ctx.measureText(item.label).width+14;
-      ctx.fillStyle="rgba(5,17,28,.9)";ctx.strokeStyle=c;ctx.lineWidth=selected?1.2:.6;
+      ctx.fillStyle=theme.labelBg;ctx.strokeStyle=c;ctx.lineWidth=selected?1.4:.7;
       ctx.beginPath();ctx.roundRect(lp.x-textW/2,lp.y-8,textW,16,3);ctx.fill();ctx.stroke();
-      ctx.fillStyle="#d9f4f8";ctx.fillText(item.label,lp.x,lp.y+3);
-      ctx.font="600 7px JetBrains Mono, monospace";ctx.fillStyle=c;ctx.fillText(item.status.toUpperCase(),lp.x,lp.y+14);
+      ctx.fillStyle=theme.labelText;ctx.fillText(item.label,lp.x,lp.y+3);
+      ctx.font="600 7px JetBrains Mono, monospace";ctx.fillStyle=theme.light ? c : c;ctx.fillText(item.status.toUpperCase(),lp.x,lp.y+14);
 
-      const allPoints = [...b, ...t];
+      const interactionPoints = [...b, ...t];
+      if (item.id === "comm") {
+        interactionPoints.push(
+          project({x:item.x-.7,y:item.h,z:item.z-.55}),
+          project({x:item.x+.7,y:item.h,z:item.z+.55}),
+          project({x:item.x,y:item.h+6.9,z:item.z}),
+          project({x:item.x-1.0,y:item.h+4.0,z:item.z}),
+          project({x:item.x+1.0,y:item.h+4.0,z:item.z})
+        );
+      }
+      const allPoints = interactionPoints;
       const minX = Math.min(...allPoints.map(p => p.x));
       const maxX = Math.max(...allPoints.map(p => p.x));
       const minY = Math.min(...allPoints.map(p => p.y));
@@ -285,9 +348,11 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
         const ex=b.x-(dx/len)*endPad, ez=b.z-(dz/len)*endPad;
         const p1=project({x:sx,y:.09,z:sz}), p2=project({x:ex,y:.09,z:ez});
         const style=CONNECTION_STYLE[link.kind];
-        const active=selectedRef.current===link.from||selectedRef.current===link.to;
+        const selected = selectedRef.current;
+        const active=selected===link.from||selected===link.to;
+        if (!selected || !active) continue;
         ctx.save();
-        ctx.strokeStyle=style.color;ctx.globalAlpha=active?.95:.52;ctx.lineWidth=active?2.5:1.35;ctx.setLineDash(style.dash);
+        ctx.strokeStyle=style.color;ctx.globalAlpha=.96;ctx.lineWidth=2.6;ctx.setLineDash(style.dash);
         ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
         ctx.setLineDash([]);
         // Direction arrow.
@@ -297,7 +362,7 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
         if(active){
           ctx.font="600 8px JetBrains Mono, monospace";ctx.textAlign="center";
           const label=link.label;const tw=ctx.measureText(label).width+10;
-          ctx.fillStyle="rgba(5,17,28,.92)";ctx.fillRect(mx-tw/2,my-13,tw,13);
+          ctx.fillStyle=canvasPalette().connectionBg;ctx.fillRect(mx-tw/2,my-13,tw,13);
           ctx.fillStyle=style.color;ctx.fillText(label,mx,my-4);
         }
         ctx.restore();
@@ -306,12 +371,13 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
 
     const drawAmbient = (w: number, h: number, time: number) => {
       // Aurora / atmosphere.
+      const theme = canvasPalette();
       const aur = ctx.createRadialGradient(w*.62,h*.16,5,w*.62,h*.16,w*.48);
-      aur.addColorStop(0,"rgba(34,218,190,.14)");aur.addColorStop(.35,"rgba(29,180,210,.07)");aur.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=aur;ctx.fillRect(0,0,w,h);
-      ctx.save();ctx.globalAlpha=.32;ctx.lineWidth=2;
+      aur.addColorStop(0,theme.ambient);aur.addColorStop(.35,"rgba(29,180,210,.07)");aur.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=aur;ctx.fillRect(0,0,w,h);
+      ctx.save();ctx.globalAlpha=theme.light ? .18 : .32;ctx.lineWidth=2;
       for(let i=0;i<4;i++){ctx.beginPath();for(let x=-30;x<w+30;x+=14){const y=h*.14+i*18+Math.sin(x*.012+time*.00025+i)*12; if(x===-30)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.strokeStyle=i%2?"rgba(55,226,198,.16)":"rgba(52,189,236,.12)";ctx.stroke();}ctx.restore();
       // Stars / particles.
-      ctx.save();ctx.globalAlpha=.45;for(let i=0;i<80;i++){const x=(i*97)%Math.max(1,w);const y=(i*47)%Math.max(1,h*.55);const r=(i%3)*.45+.35;ctx.fillStyle=i%5===0?"#a6eff6":"#d8eef1";ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}ctx.restore();
+      ctx.save();ctx.globalAlpha=theme.light ? .22 : .45;for(let i=0;i<80;i++){const x=(i*97)%Math.max(1,w);const y=(i*47)%Math.max(1,h*.55);const r=(i%3)*.45+.35;ctx.fillStyle=theme.light ? (i%5===0?"#4e98a8":"#8fb5bf") : (i%5===0?"#a6eff6":"#d8eef1");ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}ctx.restore();
     };
 
     const render = (now: number) => {
@@ -331,7 +397,8 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections
       for(const item of ordered) hit.push(drawCuboid(item));
 
       // Perimeter lights.
-      ctx.save();ctx.globalAlpha=.5;ctx.strokeStyle="#16c7e8";ctx.lineWidth=1;ctx.setLineDash([4,6]);
+      const theme = canvasPalette();
+      ctx.save();ctx.globalAlpha=theme.light ? .35 : .5;ctx.strokeStyle="#16c7e8";ctx.lineWidth=1;ctx.setLineDash([4,6]);
       const pa=project({x:-12,y:.02,z:-10}),pb=project({x:12,y:.02,z:-10}),pc=project({x:12,y:.02,z:10}),pd=project({x:-12,y:.02,z:10});
       ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.lineTo(pc.x,pc.y);ctx.lineTo(pd.x,pd.y);ctx.closePath();ctx.stroke();ctx.restore();
       (canvas as HTMLCanvasElement & {_hit?: typeof hit})._hit=hit;
