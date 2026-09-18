@@ -13,8 +13,16 @@ export interface StationModelItem {
   h: number;
 }
 
+export interface StationConnection {
+  from: string;
+  to: string;
+  label: string;
+  kind: "fuel" | "power" | "data" | "support";
+}
+
 interface Props {
   items?: StationModelItem[];
+  connections?: StationConnection[];
   selectedId?: string;
   onSelect?: (id: string) => void;
   interactive?: boolean;
@@ -47,16 +55,18 @@ const STATUS: Record<string, string> = {
 function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)); }
 function mix(a: number, b: number, t: number) { return a + (b - a) * t; }
 
-export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, selectedId, onSelect, interactive = true, animate = false, className = "", command }: Props) {
+export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, connections = [], selectedId, onSelect, interactive = true, animate = false, className = "", command }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const state = useRef({ yaw: -0.72, pitch: 0.68, zoom: 1, panX: 0, panY: 16, targetX: 0, targetZ: 0, dragging: false, panning: false, lastX: 0, lastY: 0, time: 0 });
   const itemsRef = useRef(items);
   const selectedRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
+  const connectionsRef = useRef<StationConnection[]>(connections || []);
 
   useEffect(() => { itemsRef.current = items; }, [items]);
   useEffect(() => { selectedRef.current = selectedId; }, [selectedId]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+  useEffect(() => { connectionsRef.current = connections || []; }, [connections]);
   useEffect(() => {
     if (!command) return;
     if (command.type === "reset") state.current = { ...state.current, yaw: -0.72, pitch: 0.68, zoom: 1, panX: 0, panY: 16, targetX: 0, targetZ: 0 };
@@ -180,9 +190,33 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, selectedId,
         ctx.fillStyle="#f5b942";ctx.beginPath();ctx.arc(chimney.x,chimney.y,2.2,0,Math.PI*2);ctx.fill();
       }
       if (item.id === "comm") {
-        const base=project({x:item.x,y:item.h,z:item.z}); const top=project({x:item.x,y:item.h+5.4,z:item.z});
-        ctx.strokeStyle="#89a8b4";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(base.x,base.y);ctx.lineTo(top.x,top.y);ctx.stroke();
-        ctx.strokeStyle="#16c7e8";ctx.lineWidth=1;for(let i=0;i<4;i++){const yy=mix(base.y,top.y,.25+i*.17);ctx.beginPath();ctx.arc(base.x,yy,6+i*2,.15,Math.PI-.15);ctx.stroke();}
+        // Lattice communications tower: four legs, cross-braces, microwave dish and beacon.
+        const baseY=item.h, towerH=5.8;
+        const corners=[
+          project({x:item.x-.55,y:baseY,z:item.z-.45}), project({x:item.x+.55,y:baseY,z:item.z-.45}),
+          project({x:item.x+.55,y:baseY,z:item.z+.45}), project({x:item.x-.55,y:baseY,z:item.z+.45})
+        ];
+        const top=project({x:item.x,y:baseY+towerH,z:item.z});
+        ctx.save();
+        ctx.strokeStyle="#8faab4";ctx.lineWidth=1.7;
+        for(const leg of corners){ctx.beginPath();ctx.moveTo(leg.x,leg.y);ctx.lineTo(top.x,top.y);ctx.stroke();}
+        for(let i=1;i<=5;i++){
+          const t=i/6;
+          const left=project({x:item.x-.55*(1-t),y:baseY+t*towerH,z:item.z-.45*(1-t)});
+          const right=project({x:item.x+.55*(1-t),y:baseY+t*towerH,z:item.z+.45*(1-t)});
+          ctx.beginPath();ctx.moveTo(left.x,left.y);ctx.lineTo(right.x,right.y);ctx.stroke();
+          const a=project({x:item.x-.55*(1-t),y:baseY+(i-1)/6*towerH,z:item.z-.45*(1-(i-1)/6)});
+          const b=project({x:item.x+.55*(1-(i-1)/6),y:baseY+i/6*towerH,z:item.z+.45*(1-i/6)});
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+        const mast=project({x:item.x,y:baseY+towerH+1.0,z:item.z});
+        ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(top.x,top.y);ctx.lineTo(mast.x,mast.y);ctx.stroke();
+        ctx.fillStyle="#ff5d67";ctx.beginPath();ctx.arc(mast.x,mast.y,3,0,Math.PI*2);ctx.fill();
+        // Microwave dish.
+        const dish=project({x:item.x-.2,y:baseY+towerH*.68,z:item.z});
+        ctx.strokeStyle="#16c7e8";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(dish.x,dish.y,9,.25,2.85);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(dish.x-2,dish.y);ctx.lineTo(dish.x+13,dish.y-7);ctx.stroke();
+        ctx.restore();
       }
       if (item.id === "fuel") {
         for (let i=0;i<2;i++) {
@@ -230,6 +264,46 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, selectedId,
       return { item, bounds: { x: fullMinX, y: fullMinY, w: fullMaxX - fullMinX, h: fullMaxY - fullMinY, depth: (b[0].depth+b[2].depth)/2 } };
     };
 
+    const CONNECTION_STYLE: Record<StationConnection["kind"], {color:string; dash:number[]}> = {
+      fuel: {color:"#f5b942", dash:[7,5]},
+      power: {color:"#27d9a6", dash:[5,4]},
+      data: {color:"#16c7e8", dash:[3,5]},
+      support: {color:"#9aaec0", dash:[9,6]},
+    };
+
+    const drawConnections = () => {
+      const byId = new Map(itemsRef.current.map(item => [item.id, item]));
+      for (const link of connectionsRef.current) {
+        const a=byId.get(link.from), b=byId.get(link.to);
+        if(!a||!b) continue;
+        const dx=b.x-a.x, dz=b.z-a.z;
+        const len=Math.max(.001,Math.hypot(dx,dz));
+        // Start/end at building edges so utility lines never originate from the centre.
+        const startPad=Math.min(a.w,a.d)*.48;
+        const endPad=Math.min(b.w,b.d)*.48;
+        const sx=a.x+(dx/len)*startPad, sz=a.z+(dz/len)*startPad;
+        const ex=b.x-(dx/len)*endPad, ez=b.z-(dz/len)*endPad;
+        const p1=project({x:sx,y:.09,z:sz}), p2=project({x:ex,y:.09,z:ez});
+        const style=CONNECTION_STYLE[link.kind];
+        const active=selectedRef.current===link.from||selectedRef.current===link.to;
+        ctx.save();
+        ctx.strokeStyle=style.color;ctx.globalAlpha=active?.95:.52;ctx.lineWidth=active?2.5:1.35;ctx.setLineDash(style.dash);
+        ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+        ctx.setLineDash([]);
+        // Direction arrow.
+        const mx=mix(p1.x,p2.x,.55), my=mix(p1.y,p2.y,.55);
+        const ang=Math.atan2(p2.y-p1.y,p2.x-p1.x);
+        ctx.fillStyle=style.color;ctx.beginPath();ctx.moveTo(mx+8*Math.cos(ang),my+8*Math.sin(ang));ctx.lineTo(mx-5*Math.cos(ang-.55),my-5*Math.sin(ang-.55));ctx.lineTo(mx-5*Math.cos(ang+.55),my-5*Math.sin(ang+.55));ctx.closePath();ctx.fill();
+        if(active){
+          ctx.font="600 8px JetBrains Mono, monospace";ctx.textAlign="center";
+          const label=link.label;const tw=ctx.measureText(label).width+10;
+          ctx.fillStyle="rgba(5,17,28,.92)";ctx.fillRect(mx-tw/2,my-13,tw,13);
+          ctx.fillStyle=style.color;ctx.fillText(label,mx,my-4);
+        }
+        ctx.restore();
+      }
+    };
+
     const drawAmbient = (w: number, h: number, time: number) => {
       // Aurora / atmosphere.
       const aur = ctx.createRadialGradient(w*.62,h*.16,5,w*.62,h*.16,w*.48);
@@ -248,6 +322,7 @@ export default function ThreeDStationCanvas({ items = DEFAULT_ITEMS, selectedId,
       ctx.clearRect(0,0,w,h);
       drawAmbient(w,h,now);
       drawSnow(w,h);
+      drawConnections();
 
       const ordered = [...itemsRef.current].sort((a,b)=>{
         const pa=project({x:a.x,y:a.h/2,z:a.z}); const pb=project({x:b.x,y:b.h/2,z:b.z}); return pa.depth-pb.depth;
