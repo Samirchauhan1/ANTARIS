@@ -19,7 +19,7 @@ import AIAssistant from './components/AIAssistant';
 
 export type Screen = 'overview' | 'twin' | 'environment' | 'energy' | 'equipment' | 'logistics' | 'predictions' | 'simulation' | 'scenariocmp' | 'alerts' | 'maintenance' | 'reports' | 'settings' | 'comparison' | 'profile';
 
-const themes = ['Polar Dark', 'Arctic Light', 'Midnight Blue', 'Scientific', 'High Contrast'] as const;
+const themes = ['Dark', 'Light'] as const;
 
 function initialTheme() {
   if (typeof window === 'undefined') return themes[0];
@@ -34,7 +34,7 @@ export default function App() {
   const [theme, setTheme] = useState<string>(initialTheme);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme.toLowerCase().replace(/\s+/g, '-');
+    document.documentElement.dataset.theme = theme.toLowerCase();
     localStorage.setItem('antaris-theme', theme);
   }, [theme]);
 
@@ -132,15 +132,15 @@ function Settings({ theme, onTheme }: { theme: string; onTheme: (t: string) => v
 
         </div>
         <div className="glass panel-pad">
-          <div className="section-title">ANTARIS THEMES</div>
-          <p className="panel-note">Theme tokens update the application shell, cards, controls and visualization surfaces.</p>
-          <select value={theme} onChange={e => onTheme(e.target.value)} className="theme-select large" style={{ background: '#0f172a', color: '#e2e8f0' }}>
-            {themes.map(t => <option key={t} value={t} style={{ background: '#0f172a', color: '#e2e8f0' }}>{t}</option>)}
+          <div className="section-title">APPEARANCE</div>
+          <p className="panel-note">Choose the ANTARIS interface appearance. All mission surfaces use the same design system in either mode.</p>
+          <select value={theme} onChange={e => onTheme(e.target.value)} className="theme-select large">
+            {themes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <div className="theme-swatches">
             {themes.map(t => (
               <button key={t} className={'theme-chip ' + (theme === t ? 'selected' : '')} onClick={() => onTheme(t)}>
-                {t}
+                <span className={'appearance-dot ' + t.toLowerCase()} />{t} appearance
               </button>
             ))}
           </div>
