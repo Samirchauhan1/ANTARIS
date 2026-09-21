@@ -68,3 +68,32 @@
   .login-briefing { display: none !important; }
   .access-panel { justify-self: center !important; }
 }
+
+/* Explicit high-contrast login typography: guard against legacy opacity/filter rules. */
+.login-page .access-heading h2,
+.login-page .otp-panel h2 {
+  color: #f4f9ff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  -webkit-text-fill-color: #f4f9ff !important;
+  text-shadow: none !important;
+}
+.login-page .access-heading { border-bottom: 1px solid #31536c !important; }
+.login-page .otp-panel .panel-kicker { color: #55e4f2 !important; opacity: 1 !important; }
+.login-page .otp-panel p,
+.login-page .otp-panel p b { opacity: 1 !important; filter: none !important; }
+.login-page .otp-panel p { color: #c3d3e3 !important; }
+.login-page .otp-panel p b { color: #ffffff !important; }
+.login-page .otp-inputs input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font: 700 22px 'JetBrains Mono', monospace !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  background: #050c18 !important;
+  border: 1px solid #42617c !important;
+}
+.login-page .otp-inputs input::placeholder { color: #8da6bc !important; opacity: 1 !important; }
+.login-page .otp-inputs input:focus { border-color: #45dff0 !important; }
+.login-page .access-footer { border-top: 1px solid #31536c !important; color: #9bb0c4 !important; }
+.login-page .otp-panel small { color: #a8bbce !important; opacity: 1 !important; }
