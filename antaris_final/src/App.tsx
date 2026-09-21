@@ -21,10 +21,10 @@ export type Screen = 'overview' | 'twin' | 'environment' | 'energy' | 'equipment
 
 const themes = ['Dark', 'Light'] as const;
 
+// Dark is the product default. Operators can still switch to Light in Settings;
+// their choice is kept for the current app session, then Dark is restored on reload.
 function initialTheme() {
-  if (typeof window === 'undefined') return themes[0];
-  const saved = localStorage.getItem('antaris-theme');
-  return themes.includes(saved as typeof themes[number]) ? (saved as typeof themes[number]) : themes[0];
+  return themes[0];
 }
 
 export default function App() {
@@ -35,7 +35,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme.toLowerCase();
-    localStorage.setItem('antaris-theme', theme);
+    if (theme === 'Dark') localStorage.setItem('antaris-theme', 'Dark');
+    else localStorage.setItem('antaris-theme', 'Light');
   }, [theme]);
 
   const render = () => {
@@ -86,7 +87,6 @@ function Settings({ theme, onTheme }: { theme: string; onTheme: (t: string) => v
       </div>
       <div className="settings-layout">
         <div className="settings-grid">
-          
           <div className="kpi-card setting-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontWeight: 600 }}>Telemetry Refresh Rate</span>
             <select value={refreshRate} onChange={e => setRefreshRate(e.target.value)} style={{ background: '#0f172a', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.15)', padding: '6px', borderRadius: '4px' }}>
@@ -97,7 +97,6 @@ function Settings({ theme, onTheme }: { theme: string; onTheme: (t: string) => v
             </select>
             <small style={{ opacity: 0.6 }}>How often dashboard telemetry updates.</small>
           </div>
-
           <div className="kpi-card setting-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontWeight: 600 }}>Alert Sensitivity</span>
             <select value={sensitivity} onChange={e => setSensitivity(e.target.value)} style={{ background: '#0f172a', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.15)', padding: '6px', borderRadius: '4px' }}>
@@ -107,18 +106,11 @@ function Settings({ theme, onTheme }: { theme: string; onTheme: (t: string) => v
             </select>
             <small style={{ opacity: 0.6 }}>Threshold for triggering AI alerts.</small>
           </div>
-
           <div className="kpi-card setting-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontWeight: 600 }}>Notification Sounds</span>
-            <button 
-              onClick={() => setAlertSound(!alertSound)} 
-              style={{ padding: '6px 12px', background: alertSound ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', textAlign: 'left' }}
-            >
-              {alertSound ? 'Enabled' : 'Muted'}
-            </button>
+            <button onClick={() => setAlertSound(!alertSound)} style={{ padding: '6px 12px', background: alertSound ? 'var(--color-primary)' : 'rgba(255,255,255,0.05)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', textAlign: 'left' }}>{alertSound ? 'Enabled' : 'Muted'}</button>
             <small style={{ opacity: 0.6 }}>Play sounds for incoming alerts.</small>
           </div>
-
           <div className="kpi-card setting-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontWeight: 600 }}>Data Retention Policy</span>
             <select value={retention} onChange={e => setRetention(e.target.value)} style={{ background: '#0f172a', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.15)', padding: '6px', borderRadius: '4px' }}>
@@ -129,21 +121,12 @@ function Settings({ theme, onTheme }: { theme: string; onTheme: (t: string) => v
             </select>
             <small style={{ opacity: 0.6 }}>Duration to store historical telemetry.</small>
           </div>
-
         </div>
         <div className="glass panel-pad">
           <div className="section-title">APPEARANCE</div>
           <p className="panel-note">Choose the ANTARIS interface appearance. All mission surfaces use the same design system in either mode.</p>
-          <select value={theme} onChange={e => onTheme(e.target.value)} className="theme-select large">
-            {themes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <div className="theme-swatches">
-            {themes.map(t => (
-              <button key={t} className={'theme-chip ' + (theme === t ? 'selected' : '')} onClick={() => onTheme(t)}>
-                <span className={'appearance-dot ' + t.toLowerCase()} />{t} appearance
-              </button>
-            ))}
-          </div>
+          <select value={theme} onChange={e => onTheme(e.target.value)} className="theme-select large">{themes.map(t => <option key={t} value={t}>{t}</option>)}</select>
+          <div className="theme-swatches">{themes.map(t => <button key={t} className={'theme-chip ' + (theme === t ? 'selected' : '')} onClick={() => onTheme(t)}><span className={'appearance-dot ' + t.toLowerCase()} />{t} appearance</button>)}</div>
         </div>
       </div>
     </div>
